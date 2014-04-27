@@ -1,4 +1,21 @@
 srt-helper-mode
 ===============
 
-Srt Helper Major Mode for Emacs
+Srt-helper (srt-helper.el) is a major mode for adjusting time offsets of subtitles in srt files.
+
+This tool shifts all the timestamps of a subtitle file. They can be used for synchronizing the subtitles to a video when there is a slight offset between the two (this can be the case when the subtitles and the video come from two different sources).
+
+Installation
+------------
+
+To use srt-helper.el, put it in your load-path and add the following to your .emacs
+
+```
+(require 'srt-helper)
+```
+
+ or
+
+```
+(autoload 'srt-helper-mode "srt-helper" "srt helper major mode." t)
+```
