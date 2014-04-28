@@ -60,6 +60,7 @@
   nil
   (setq srt-helper-mode-map (make-sparse-keymap))
   (define-key srt-helper-mode-map (kbd "C-c o") 'srt-helper-offset-cues)
+  (define-key srt-helper-mode-map (kbd "C-c t") 'srt-helper-offset-cues-towards)
   (define-key srt-helper-mode-map (kbd "C-c s") 'srt-helper-search-forward)
   (define-key srt-helper-mode-map (kbd "C-c r") 'srt-helper-search-backward))
 
@@ -281,5 +282,39 @@ of time such as -3.14, 1:32,572, 182."
 	  (srt-helper--replace-timestamp
 	   (+ (oref timings :start) ms)
 	   (+ (oref timings :end) ms)))))))
+
+(defun srt-helper-offset-cues (string)
+  "Offset all srt cues by STRING. STRING should be an expression
+of time such as -3.14, 1:32,572, 182."
+  (interactive "sOffset (-3.14, 1:32,572, 182, etc): ")
+  (save-excursion
+    (save-match-data
+      (srt-helper--offset-cues-by-ms
+       (srt-helper--maybe-time string)))))
+
+(defun srt-helper--offset-cues-by-ms (ms)
+  "Offset all srt cures by MS."
+  (goto-char (point-min))
+  (let ((timings (srt-helper--get-current-timings)))
+    (srt-helper--replace-timestamp
+     (+ (oref timings :start) ms)
+     (+ (oref timings :end) ms))
+    (while (setq timings (srt-helper--get-next-timings))
+      (srt-helper--replace-timestamp
+       (+ (oref timings :start) ms)
+       (+ (oref timings :end) ms)))))
+
+(defun srt-helper-offset-cues-towards (timestamp)
+  "Offset all srt cues as to make current cue's
+timestamp to TIMESTAMP."
+  (interactive
+      (list (read-from-minibuffer "New timestamp: "
+				  (srt-helper--ms-to-timestamp
+				   (oref (srt-helper--get-current-timings) :start)))))
+  (save-excursion
+    (save-match-data
+      (srt-helper--offset-cues-by-ms
+   (- (srt-helper--timestamp-to-ms timestamp)
+      (oref (srt-helper--get-current-timings) :start))))))
 
 (provide 'srt-helper)
