@@ -27,14 +27,7 @@
 
 ;;;; Code:
 
-
-;;; Ob constants
-
-;; (defconst org-test-file-ob-anchor
-;;   "94839181-184f-4ff4-a72f-94214df6f5ba")
-
-;; (defconst org-test-link-in-heading-file-ob-anchor
-;;   "a8b1d111-eca8-49f0-8930-56d4f0875155")
+;;; Constants
 
 (unless (and (boundp 'srt-helper-batch-test) srt-helper-batch-test)
   (let* ((srt-helper-test-dir (expand-file-name
@@ -42,40 +35,15 @@
 				(or load-file-name buffer-file-name))))
 	 (srt-helper-lisp-dir (expand-file-name
 			       (concat srt-helper-test-dir "../lisp"))))
-
     (unless (featurep 'srt-helper)
       (setq load-path (cons srt-helper-lisp-dir load-path))
       (require 'srt-helper)
-      ;; (require 'org-id)
-      ;; (require 'ox)
-      ;; (org-babel-do-load-languages
-      ;;  'org-babel-load-languages '((shell . t) (org . t))))
-
     (let* ((load-path (cons
 		       srt-helper-test-dir
 		       (cons
 			(expand-file-name "jump" srt-helper-test-dir)
 			load-path))))
       (require 'cl)
-      (when (= emacs-major-version 22)
-	(defvar special-mode-map
-	  (let ((map (make-sparse-keymap)))
-	    (suppress-keymap map)
-	    (define-key map "q" 'quit-window)
-	    (define-key map " " 'scroll-up)
-	    (define-key map "\C-?" 'scroll-down)
-	    (define-key map "?" 'describe-mode)
-	    (define-key map "h" 'describe-mode)
-	    (define-key map ">" 'end-of-buffer)
-	    (define-key map "<" 'beginning-of-buffer)
-	    (define-key map "g" 'revert-buffer)
-	    (define-key map "z" 'kill-this-buffer)
-	    map))
-
-	(put 'special-mode 'mode-class 'special)
-	(define-derived-mode special-mode nil "Special"
-	  "Parent major mode from which special major modes should inherit."
-	  (setq buffer-read-only t)))
       (require 'ert)
       (require 'ert-x)
       (when (file-exists-p
@@ -108,17 +76,6 @@ srt-helper-test searches this directory up the directory tree.")
 (put 'missing-test-dependency
      'error-conditions
      '(error missing-test-dependency))
-
-;; (defun org-test-for-executable (exe)
-;;   "Throw an error if EXE is not available.
-;; This can be used at the top of code-block-language specific test
-;; files to avoid loading the file on systems without the
-;; executable."
-;;   (unless (reduce
-;; 	   (lambda (acc dir)
-;; 	     (or acc (file-exists-p (expand-file-name exe dir))))
-;; 	   exec-path :initial-value nil)
-;;     (signal 'missing-test-dependency (list exe))))
 
 (defmacro srt-helper-test-in-example-file (file &rest body)
   "Execute body in the srt-helper-mode example file."
