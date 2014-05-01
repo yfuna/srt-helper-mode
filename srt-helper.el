@@ -206,8 +206,6 @@ on a best effort basis."
      (* (string-to-number
 	 (replace-regexp-in-string "," "." string))
 	1000))))
-;; (srt-helper--maybe-time "4:16")244000 (#o734440, #x3b920, ?𻤠)
-;; (srt-helper--timestamp-to-ms "00:04:16,000")256000
 
 (defun srt-helper--interpret-maybe-timestamp (string)
   "Interpret and convert STRING, which contains colon(s),

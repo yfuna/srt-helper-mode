@@ -112,7 +112,7 @@ currently executed.")
   "Execute body in the srt-helper-mode example file."
   (declare (indent 1))
   `(let* ((my-file (or ,file srt-helper-test-file))
-	  (visited-p (get-file-buffer my-file))
+	  (VISITED-p (get-file-buffer my-file))
 	  to-be-removed)
      (save-window-excursion
        (save-match-data
@@ -125,6 +125,24 @@ currently executed.")
      (unless visited-p
        (kill-buffer to-be-removed))))
 (def-edebug-spec srt-helper-test-in-example-file (form body))
+
+(defmacro srt-helper-test-in-example-file-2 (file &rest body)
+  "Execute body in the srt-helper-mode example file."
+  (declare (indent 1))
+  `(let* ((my-file (expand-file-name ,file srt-helper-test-example-dir))
+	  (VISITED-p (get-file-buffer my-file))
+	  to-be-removed)
+     (save-window-excursion
+       (save-match-data
+	 (find-file my-file)
+	 (unless (eq major-mode 'srt-helper-mode)
+	   (srt-helper-mode))
+	 (setq to-be-removed (current-buffer))
+	 (goto-char (point-min))
+	 (save-restriction ,@body)))
+     (unless visited-p
+       (kill-buffer to-be-removed))))
+(def-edebug-spec srt-helper-test-in-example-file-2 (form body))
 
 (defmacro srt-helper-test-at-marker (file marker &rest body)
   "Run body after placing the point at MARKER in FILE.
