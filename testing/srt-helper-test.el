@@ -49,7 +49,7 @@
       (when (file-exists-p
 	     (expand-file-name "jump/jump.el" srt-helper-test-dir))
 	(require 'jump)
-	(require 'which-func)))))
+	(require 'which-func))))))
 
 (defconst srt-helper-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
@@ -76,6 +76,37 @@ srt-helper-test searches this directory up the directory tree.")
 (put 'missing-test-dependency
      'error-conditions
      '(error missing-test-dependency))
+
+(defun srt-helpr-test-buffer (&optional file)
+  "TODO:  Setup and return a buffer to work with.
+If file is non-nil insert it's contents in there.")
+
+(defun srt-helper-test-compare-with-file (&optional file)
+  "TODO:  Compare the contents of the test buffer with FILE.
+If file is not given, search for a file named after the test
+currently executed.")
+
+(defmacro srt-helper-test-at-id (id &rest body)
+  "Run body after placing the point in the headline identified by ID."
+  (declare (indent 1))
+  `(let* ((id-location (org-id-find ,id))
+	  (id-file (car id-location))
+	  (visited-p (get-file-buffer id-file))
+	  to-be-removed)
+     (unwind-protect
+	 (save-window-excursion
+	   (save-match-data
+	     (org-id-goto ,id)
+	     (setq to-be-removed (current-buffer))
+	     (condition-case nil
+		 (progn
+		   (org-show-subtree)
+		   (org-show-block-all))
+	       (error nil))
+	     (save-restriction ,@body)))
+       (unless (or visited-p (not to-be-removed))
+	 (kill-buffer to-be-removed)))))
+(def-edebug-spec srt-helper-test-at-id (form body))
 
 (defmacro srt-helper-test-in-example-file (file &rest body)
   "Execute body in the srt-helper-mode example file."
@@ -211,7 +242,7 @@ otherwise place the point at the beginning of the inserted text."
 (defun srt-helper-test-load ()
   "Load up the srt-helper-mode test suite."
   (interactive)
-  (flet ((rld (base)
+  (cl-flet ((rld (base)
 	      ;; Recursively load all files, if files throw errors
 	      ;; then silently ignore the error and continue to the
 	      ;; next file.  This allows files to error out if
@@ -226,7 +257,7 @@ otherwise place the point at the beginning of the inserted text."
 			 (load-file path))
 		     (missing-test-dependency
 		      (let ((name (intern
-				   (concat "org-missing-dependency/"
+				   (concat "srt-helper-missing-dependency/"
 					   (file-name-nondirectory
 					    (file-name-sans-extension path))))))
 			(eval `(ert-deftest ,name ()
@@ -256,7 +287,7 @@ otherwise place the point at the beginning of the inserted text."
 		 srt-helper-test-example-dir 'full
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.srt$"))
     (unless (get-file-buffer file)
-      (add-to-list 'org-test-buffers (find-file file)))))
+      (add-to-list 'srt-helper-test-buffers (find-file file)))))
 
 (defun srt-helper-test-kill-all-examples ()
   (while srt-helper-test-buffers
