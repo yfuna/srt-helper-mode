@@ -144,29 +144,28 @@ end time offset of an srt cue.")
 
 (defvar srt-helper-evaluation-fn
   (lexical-let (log)
-	(lambda (ms timings &optional init)
-	  (if init
-	      (setq log nil)
-	    (unless timings
-	      (throw 'close nil))
-	    (let ((diff (- (oref timings :start)
-			   ms)))
-	    (if log
-		(cond ((= diff 0) (progn
-				    (goto-char (point))
-				    (beginning-of-line)
-				    (throw 'close nil)))
-		      ((< (* diff (car (nth 0 log))) 0)
-		       (if (<= (abs diff)
-			       (abs (car (nth 0 log))))
-			   (progn
-			     (goto-char (point))
-			     (beginning-of-line)
-			     (throw 'close nil))
-			 (goto-char (cdr (nth 0 log)))
-			 (beginning-of-line)
-			 (throw 'close nil)))))
-	    (push (cons diff (point)) log)))))
+    (lambda (ms timings &optional init)
+      (if init
+	  (setq log nil)
+	(unless timings
+	  (throw 'close nil))
+	(let ((diff (- (oref timings :start) ms)))
+	  (if log
+	      (cond ((= diff 0) (progn
+				  (goto-char (point))
+				  (beginning-of-line)
+				  (throw 'close nil)))
+		    ((< (* diff (car (first log))) 0)
+		     (if (<= (abs diff)
+			     (abs (car (first log))))
+			 (progn
+			   (goto-char (point))
+			   (beginning-of-line)
+			   (throw 'close nil))
+		       (goto-char (cdr (first log)))
+		       (beginning-of-line)
+		       (throw 'close nil)))))
+	  (push (cons diff (point)) log)))))
   "An evaluation function to find an srt cue close to
 a time offset of MS.")
 
@@ -207,6 +206,8 @@ on a best effort basis."
      (* (string-to-number
 	 (replace-regexp-in-string "," "." string))
 	1000))))
+;; (srt-helper--maybe-time "4:16")244000 (#o734440, #x3b920, ?𻤠)
+;; (srt-helper--timestamp-to-ms "00:04:16,000")256000
 
 (defun srt-helper--interpret-maybe-timestamp (string)
   "Interpret and convert STRING, which contains colon(s),
@@ -221,14 +222,14 @@ into miliseconds on a best effort basis."
 	(setq m (string-to-number
 		 (first digits-list))
 	      s (string-to-number
-		 (replace-regexp-in-string "," "." (first digits-list)))))
+		 (replace-regexp-in-string "," "." (second digits-list)))))
        ((= len 3)
 	(setq h (string-to-number
 		 (first digits-list))
 	      m (string-to-number
 		 (second digits-list))
 	      s (string-to-number
-		 (replace-regexp-in-string "," "." (second digits-list))))))
+		 (replace-regexp-in-string "," "." (third digits-list))))))
       (truncate (* (+ (* (+ (* h 60) m) 60) s) 1000)))))
 
 (defun srt-helper--create-timings-forward ()

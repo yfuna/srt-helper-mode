@@ -17,8 +17,6 @@
 		     "00:23:34,600"))
       ))
 
-
-
-
-
-
+(ert-deftest srt-helper-test-time-conversion ()
+  (should (equal (srt-helper--maybe-time "4:16")
+		 (srt-helper--timestamp-to-ms "00:04:16,000"))))
