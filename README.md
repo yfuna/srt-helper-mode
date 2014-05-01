@@ -28,29 +28,28 @@ You can use your own evaluation function for heuristic serarhes to find an srt c
 ```
 (defvar srt-helper-evaluation-fn
   (lexical-let (log)
-	(lambda (ms timings &optional init)
-	  (if init
-	      (setq log nil)
-	    (unless timings
-	      (throw 'close nil))
-	    (let ((diff (- (oref timings :start)
-			   ms)))
-	    (if log
-		(cond ((= diff 0) (progn
-				    (goto-char (point))
-				    (beginning-of-line)
-				    (throw 'close nil)))
-		      ((< (* diff (car (nth 0 log))) 0)
-		       (if (<= (abs diff)
-			       (abs (car (nth 0 log))))
-			   (progn
-			     (goto-char (point))
-			     (beginning-of-line)
-			     (throw 'close nil))
-			 (goto-char (cdr (nth 0 log)))
-			 (beginning-of-line)
-			 (throw 'close nil)))))
-	    (push (cons diff (point)) log)))))
+    (lambda (ms timings &optional init)
+      (if init
+	  (setq log nil)
+	(unless timings
+	  (throw 'close nil))
+	(let ((diff (- (oref timings :start) ms)))
+	  (if log
+	      (cond ((= diff 0) (progn
+				  (goto-char (point))
+				  (beginning-of-line)
+				  (throw 'close nil)))
+		    ((< (* diff (car (first log))) 0)
+		     (if (<= (abs diff)
+			     (abs (car (first log))))
+			 (progn
+			   (goto-char (point))
+			   (beginning-of-line)
+			   (throw 'close nil))
+		       (goto-char (cdr (first log)))
+		       (beginning-of-line)
+		       (throw 'close nil)))))
+	  (push (cons diff (point)) log)))))
   "An evaluation function to find an srt cue close to
 a time offset of MS.")
 ```
