@@ -85,7 +85,7 @@
   nil
   (setq srt-helper-mode-map (make-sparse-keymap))
   (define-key srt-helper-mode-map (kbd "C-c o") 'srt-helper-offset-cues)
-  (define-key srt-helper-mode-map (kbd "C-c t") 'srt-helper-offset-cues-towards)
+  (define-key srt-helper-mode-map (kbd "C-c c") 'srt-helper-change-cues-towards)
   (define-key srt-helper-mode-map (kbd "C-c s") 'srt-helper-search-forward)
   (define-key srt-helper-mode-map (kbd "C-c r") 'srt-helper-search-backward))
 
@@ -142,6 +142,14 @@ a start time offset or end time offset of an srt cue.")
   "Class that represents srt timings: a start time offset and
 end time offset of an srt cue.")
 
+;; (defclass srt-helper-cue ()
+;;   ((counter :initarg :counter
+;; 	    :initform nil)
+;;    (timings :initarg :timings)
+;;    (payload :initarg :payload)))
+
+;; (defclass srt-helper-payload ()
+;;   )
 (defvar srt-helper-evaluation-fn
   (lexical-let (log)
     (lambda (ms timings &optional init)
@@ -328,7 +336,7 @@ of time such as -3.14, 1:32,572, 182."
        (+ (oref timings :start) ms)
        (+ (oref timings :end) ms)))))
 
-(defun srt-helper-offset-cues-towards (timestamp)
+(defun srt-helper-change-cues-towards (timestamp)
   "Offset all srt cues as to make current cue's
 timestamp to TIMESTAMP."
   (interactive
@@ -340,5 +348,10 @@ timestamp to TIMESTAMP."
       (srt-helper--offset-cues-by-ms
    (- (srt-helper--timestamp-to-ms timestamp)
       (oref (srt-helper--get-current-timings) :start))))))
+
+(defun srt-helper-parse-an-srt-cue ()
+  "Parse an srt cue.")
+
+
 
 (provide 'srt-helper)
